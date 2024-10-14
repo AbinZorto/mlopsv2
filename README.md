@@ -238,7 +238,7 @@ aml-cli-v2/
   ├── allocate-traffic.yml              # YAML template for allocating traffic between model versions.
   ├── connect-to-workspace.yml          # Template to connect to an Azure ML workspace.
   ├── create-compute.yml                # Template to create necessary Azure ML compute resources.
-  ├── create-deployment.yml              # YAML file to handle the deployment of models.
+  ├── create-deployment.yml             # YAML file to handle the deployment of models.
   ├── create-endpoint.yml               # Template to create endpoints for deployed models.
   ├── install-aml-cli.yml               # Template to install Azure Machine Learning CLI.
   ├── install-az-cli.yml                # Template to install Azure CLI.
@@ -277,21 +277,21 @@ infrastructure/
   │   ├── aml_computecluster.bicep      # Bicep template for creating AML compute clusters.
   │   ├── aml_workspace.bicep           # Bicep template for creating AML workspaces.
   │   ├── application_insights.bicep    # Bicep template for setting up Application Insights.
-  │   ├── container_registry.bicep       # Bicep template for creating a container registry.
+  │   ├── container_registry.bicep      # Bicep template for creating a container registry.
   │   ├── key_vault.bicep               # Bicep template for creating Azure Key Vault.
-  │   └── storage_account.bicep          # Bicep template for creating a storage account.
+  │   └── storage_account.bicep         # Bicep template for creating a storage account.
   ├── pipelines/                         # Directory for infrastructure deployment pipelines.
   │   └── bicep-ado-deploy-infra.yml    # YAML template for deploying infrastructure using Bicep.
 
 mlops-pipelines/
-  ├── deploy/                            # Directory for deployment pipelines.
+  ├── deploy/                             # Directory for deployment pipelines.
   │   ├── batch/                         # Subdirectory for batch deployment pipelines.
   │   │   ├── batch-deployment.yml       # Pipeline for deploying batch models.
   │   │   └── batch-endpoint.yml         # Pipeline for setting up batch endpoints.
   │   └── online/                        # Subdirectory for online deployment pipelines.
   │       ├── online-deployment.yml      # Pipeline for deploying online models.
   │       └── online-endpoint.yml        # Pipeline for setting up online endpoints.
-  ├── evaluate/                          # Directory for evaluation pipelines.
+  ├── evaluate/                           # Directory for evaluation pipelines.
   │   ├── test/                          # Subdirectory for testing pipelines.
   │   │   └── stage-test.yml             # Pipeline for testing models in the staging environment.
   │   └── train/                         # Subdirectory for training pipelines.
@@ -299,9 +299,9 @@ mlops-pipelines/
   ├── dev-model-training.yml             # Main development model training pipeline.
   ├── prod-batch-endpoint.yml            # Production batch endpoint deployment pipeline.
   ├── prod-online-endpoint.yml           # Production online endpoint deployment pipeline.
-  ├── prod-register-in-production.yml     # Production model registration pipeline.
+  ├── prod-register-in-production.yml    # Production model registration pipeline.
   ├── stage-batch-endpoint.yml           # Staging batch endpoint deployment pipeline.
-  ├── stage-model-testing.yml             # Staging model testing pipeline.
-  ├── stage-online-endpoint.yml           # Staging online endpoint deployment pipeline.
-  └── stage-register-in-staging.yml       # Staging model registration pipeline.
+  ├── stage-model-testing.yml            # Staging model testing pipeline.
+  ├── stage-online-endpoint.yml          # Staging online endpoint deployment pipeline.
+  └── stage-register-in-staging.yml      # Staging model registration pipeline.
 ```
