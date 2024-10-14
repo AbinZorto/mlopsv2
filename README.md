@@ -1,7 +1,6 @@
 # Azure DevOps MLOps Template for Classical Machine Learning
 
-## Description
-
+**Description:**  
 This repository provides an Azure DevOps MLOps pipeline template for classical machine learning workflows. It is designed to automate key processes such as model training, evaluation, and deployment using Azure Machine Learning (AML) services. The pipeline operates on a self-hosted system pool instead of Azure's cloud-based pools.
 
 ## Table of Contents
@@ -10,10 +9,12 @@ This repository provides an Azure DevOps MLOps pipeline template for classical m
 2. [Prerequisites](#prerequisites)
 3. [Installation and Setup](#installation-and-setup)
 4. [Service Principal Setup](#service-principal-setup)
-5. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
-6. [Usage](#usage)
-7. [Contributing](#contributing)
-8. [License](#license)
+5. [Creating Azure DevOps Environments](#creating-azure-devops-environments)
+6. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
+7. [Deploy and Execute Azure Machine Learning Pipelines](#deploy-and-execute-azure-machine-learning-pipelines)
+8. [Usage](#usage)
+9. [Contributing](#contributing)
+10. [License](#license)
 
 ## Getting Started
 
@@ -71,6 +72,24 @@ For Azure DevOps pipelines to create Azure Machine Learning infrastructure, depl
 5. **Configure Azure DevOps Service Connections**
    Use the service principal credentials to create service connections in Azure DevOps.
 
+## Creating Azure DevOps Environments
+
+The pipelines in each branch of your ML project repository will depend on Azure DevOps environments. These environments should be created before deployment.
+
+To create the Dev, Stage, and Prod environments:
+
+1. **Create New Environments**
+   - In Azure DevOps, select Pipeline in the left menu and then select Environments.
+   - Select New Environment.
+
+2. **Name the Environments**
+   - Create three environments named dev, stage, and prod.
+   - Click Create for each.
+
+The environments will initially be empty and indicate "Never deployed," but this status will update after the first deployment.
+
+Once the environments are created, you are ready to deploy your Azure Machine Learning infrastructure and execute the ML training and model deployment pipelines.
+
 ## MLOps Pipelines and CI/CD Architecture
 
 ### MLOps Pipelines
@@ -99,6 +118,21 @@ The repository is designed around a CI/CD pipeline to streamline the development
 - **Continuous Deployment (CD)**: Deployment pipelines automate the process of moving models through different environments.
 - **Model Registry**: Models are registered in different environments using dedicated pipelines.
 - **Self-hosted Agent Pool**: The CI/CD process runs on a self-hosted agent pool for better control and integration with on-premise systems.
+
+## Deploy and Execute Azure Machine Learning Pipelines
+
+Now that your ML project is created, follow these steps to deploy and execute the pipelines:
+
+1. **Deploy Azure Machine Learning Infrastructure**
+   - Go to your project repository (e.g., taxi-fare-regression).
+   - Customize the `config-infra-dev.yml`, `config-infra-stage.yml`, and `config-infra-prod.yml` files to define unique Azure resource groups and Azure ML workspaces for your project in each environment.
+   - Run the infrastructure deployment pipeline (`bicep-ado-deploy-infra.yml`) to deploy the Azure Machine Learning resources (e.g., resource groups, workspaces, compute clusters) for each environment.
+
+2. **Deploy and Manage Pipelines**
+   - Once infrastructure is deployed, deploy the ML training and model deployment pipelines in the respective environments.
+   - Manage the development of the model training pipeline in the Dev environment.
+   - When the model is validated in the Dev environment, promote it to the Stage environment for further testing.
+   - After successful validation in the Stage environment, promote the model to the Prod environment through pull requests and run the model deployment pipeline.
 
 ## Usage
 
