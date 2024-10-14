@@ -3,7 +3,7 @@
 **Description:**  
 This repository provides an Azure DevOps MLOps pipeline template for classical machine learning workflows. It is designed to automate key processes such as model training, evaluation, and deployment using Azure Machine Learning (AML) services. The pipeline operates on a self-hosted system pool instead of Azure's cloud-based pools.
 
-This repository is based on the mlopsv2 accelerator repo by the azure team https://github.com/Azure/mlops-v2/tree/main. It adresses and gets passed certain errors encountered in the repo as well as uses an automl training pipeline for classical regression instead of random forest (still kept in train2.py). This an aml-cli-v2 version focused on classical machine learning, other versions focused on a different type of machine learning/iac
+This repository is based on the mlopsv2 accelerator repo by the azure team https://github.com/Azure/mlops-v2/tree/main. It adresses and gets passed certain errors encountered in the repo as well as uses an automl training pipeline for classical regression instead of random forest (still kept in train2.py). This an aml-cli-v2 version focused on classical machine learning (other versions focused on a different type of machine learning/iac will be implemented at a later date)
 
 
 ## Table of Contents
