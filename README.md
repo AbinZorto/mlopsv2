@@ -3,22 +3,22 @@
 **Description:**  
 This repository provides an Azure DevOps MLOps pipeline template for classical machine learning workflows. It is designed to automate key processes such as model training, evaluation, and deployment using Azure Machine Learning (AML) services. The pipeline operates on a self-hosted system pool instead of Azure's cloud-based pools.
 
-This repository is based on the mlopsv2 accelerator repo by the azure team https://github.com/Azure/mlops-v2/tree/main. It adresses and gets passed certain errors encountered in the repo as well as uses an automl training pipeline for classical regression instead of random forest (still kept in train2.py). This an aml-cli-v2 version focused on classical machine learning (other versions focused on a different type of machine learning/iac will be implemented at a later date)
-
+This repository is based on the mlopsv2 accelerator repo by the Azure team https://github.com/Azure/mlops-v2/tree/main. It addresses and gets past certain errors encountered in the repo as well as uses an AutoML training pipeline for classical regression instead of random forest (still kept in train2.py). This is an aml-cli-v2 version focused on classical machine learning (other versions focused on a different type of machine learning/iac will be implemented at a later date).
 
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
 2. [Prerequisites](#prerequisites)
-3. [Python Pipeline Overview](#python-pipeline-overview)
-4. [Installation and Setup](#installation-and-setup)
-5. [Service Principal Setup](#service-principal-setup)
-6. [Creating Azure DevOps Environments](#creating-azure-devops-environments)
-7. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
-8. [Deploy and Execute Azure Machine Learning Pipelines](#deploy-and-execute-azure-machine-learning-pipelines)
-9. [Usage](#usage)
-10. [Contributing](#contributing)
-11. [License](#license)
+3. [Project Structure](#project-structure)
+4. [Python Pipeline Overview](#python-pipeline-overview)
+5. [Installation and Setup](#installation-and-setup)
+6. [Service Principal Setup](#service-principal-setup)
+7. [Creating Azure DevOps Environments](#creating-azure-devops-environments)
+8. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
+9. [Deploy and Execute Azure Machine Learning Pipelines](#deploy-and-execute-azure-machine-learning-pipelines)
+10. [Usage](#usage)
+11. [Contributing](#contributing)
+12. [License](#license)
 
 ## Getting Started
 
@@ -28,10 +28,35 @@ This repository is designed for deploying and managing machine learning models u
 
 Before running the pipeline, ensure that you have the following:
 
-- **Self-hosted Azure DevOps Agent**: A self-hosted system to run Azure DevOps pipelines. (this repo uses a macos selfhosted agent) https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/osx-agent?view=azure-devops
+- **Self-hosted Azure DevOps Agent**: A self-hosted system to run Azure DevOps pipelines. (this repo uses a macOS self-hosted agent) https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/osx-agent?view=azure-devops
 - **Azure Subscription**: Access to necessary Azure Machine Learning resources.
 - **Python 3.12** installed on the self-hosted system.
 - **Azure CLI** and **AML CLI**, which will be installed automatically by the pipeline templates.
+
+## Project Structure
+
+The repository is organized into several key directories:
+
+### aml-cli-v2/
+Contains YAML templates for managing Azure resources, including the creation of compute resources, deployments, and connections to the Azure Machine Learning workspace.
+
+### data-science/
+This directory includes all components related to data preparation and model training:
+- **data/**: Contains datasets used for training and evaluation, along with metadata files.
+- **environment/**: Holds configurations for the Conda environments used in training and AutoML.
+- **src/**: Contains the main source code scripts responsible for data preparation, training, evaluation, and model registration.
+
+### infrastructure/
+This folder is dedicated to the infrastructure setup for the Azure resources:
+- **env-variables/**: Contains configuration files for different environments (Dev, Stage, Prod).
+- **modules/**: Houses Bicep modules for resource creation, such as Azure ML workspaces and compute clusters.
+- **pipelines/**: Includes YAML files for deploying infrastructure using Bicep.
+
+### mlops-pipelines/
+This directory contains the main Azure DevOps pipelines for MLOps processes:
+- **deploy/**: Subdirectories for batch and online deployment pipelines, including the necessary YAML files.
+- **evaluate/**: Contains testing and training pipelines for evaluating and training models.
+- **Main Pipelines**: YAML files for development, staging, and production pipelines that automate model training, deployment, and registration.
 
 ## Python Pipeline Overview
 
@@ -47,47 +72,35 @@ This repository includes several Python scripts that handle key stages of the ma
 
 3. **`prep.py` - Data Preparation**  
    This script is responsible for preprocessing the data before it is fed into the training pipelines. Key features include:
-   - **Data Cleaning**: Handles missing values, outliers, and inconsistent data entries.
-   - **Feature Engineering**: Creates new features from existing data to enhance model performance.
-   - **Normalization/Scaling**: Applies techniques to normalize or scale features, ensuring that the data is suitable for the models being trained.
-   - **Dataset Splitting**: Splits the data into training and validation sets, optimizing the training process and model evaluation.
-
-   The `prep.py` script ensures that the data is in the right format and quality for the training scripts, improving the overall efficiency and accuracy of the model.
+   - Data Cleaning
+   - Feature Engineering
+   - Normalization/Scaling
+   - Dataset Splitting
 
 4. **`evaluate.py` - Model Evaluation**  
    This script evaluates the performance of trained models based on validation metrics. Key functions include:
-   - **Performance Metrics Calculation**: Computes metrics such as accuracy, precision, recall, F1-score, mean absolute error (MAE), and mean squared error (MSE).
-   - **Model Comparison**: Compares the performance of different models trained during the same pipeline run, providing insights into which model performs best under specific conditions.
-   - **Visualization**: Generates plots and visualizations (e.g., confusion matrices, ROC curves) to help stakeholders understand model performance.
-
-   The `evaluate.py` script allows data scientists and ML engineers to analyze the model's performance and decide whether to proceed with deployment.
+   - Performance Metrics Calculation
+   - Model Comparison
+   - Visualization
 
 5. **`register.py` - Model Registration**  
    This script is used to register trained models into the Azure Machine Learning workspace. Key features include:
-   - **Model Versioning**: Automatically manages model versions, ensuring that each new model is stored correctly in the workspace for tracking and comparison.
-   - **Metadata Logging**: Records important metadata about the model, such as performance metrics, training parameters, and dataset versions.
-   - **Deployment Preparation**: Prepares models for deployment by ensuring they are registered with the necessary configurations in Azure ML.
-
-   The `register.py` script streamlines the model registration process, making it easy to manage different versions and ensure that only the best-performing models are deployed.
+   - Model Versioning
+   - Metadata Logging
+   - Deployment Preparation
 
 6. **`stageprep.py` - Staging Data Preparation**  
-   Similar to `prep.py`, this script prepares data specifically for the staging environment. It may include additional steps specific to the testing or validation of models that are being promoted from Dev to Stage.
+   Similar to `prep.py`, this script prepares data specifically for the staging environment.
 
 ### Integration into Azure DevOps Pipelines
 
-All these scripts are integrated into the Azure DevOps pipeline, ensuring a seamless workflow:
-
-- **Data Preparation**: The `prep.py` script is executed as part of the `dev-model-training.yml` pipeline, ensuring that the data is clean and ready before training begins.
-  
-- **Model Training and Evaluation**: After data preparation, the pipeline executes `train.py` or `train2.py` to train the models, followed by `evaluate.py` to assess their performance based on predefined metrics.
-
-- **Model Registration**: If the evaluation meets the required thresholds, `register.py` is called to register the model in the Azure ML workspace, making it available for deployment.
+All these scripts are integrated into the Azure DevOps pipeline, ensuring a seamless workflow from data preparation to model deployment.
 
 ### Customization Options
 
-- **Data Processing Logic**: Each of the preparation scripts (`prep.py`, `stageprep.py`) can be customized to include specific data transformations, feature selections, or additional preprocessing steps that are relevant to your use case.
+- **Data Processing Logic**: Each of the preparation scripts can be customized to include specific data transformations, feature selections, or additional preprocessing steps that are relevant to your use case.
   
-- **Evaluation Criteria**: You can modify `evaluate.py` to include specific performance metrics that are more aligned with your project's goals, ensuring that the evaluation process captures all necessary aspects of model performance.
+- **Evaluation Criteria**: You can modify `evaluate.py` to include specific performance metrics that are more aligned with your project's goals.
 
 ## Installation and Setup
 
