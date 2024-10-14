@@ -216,6 +216,20 @@ To run the pipeline:
 2. **Deploy to Staging**: Use the staging pipelines to deploy your model to the staging environment.
 3. **Deploy to Production**: After successful staging validation, use the production pipelines to deploy the model into the production environment.
 4. **Register Models**: Use the registration pipelines to handle the registration of models in the respective environments.
+  
+## Contributing
+
+To contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes and commit them (`git commit -m 'Feature description'`).
+4. Push to the branch (`git push origin feature-branch`).
+5. Create a new Pull Request.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for more details.
 
 ## Directory Structure
 
@@ -291,17 +305,3 @@ mlops-pipelines/
   ├── stage-online-endpoint.yml           # Staging online endpoint deployment pipeline.
   └── stage-register-in-staging.yml       # Staging model registration pipeline.
 ```
-  
-## Contributing
-
-To contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes and commit them (`git commit -m 'Feature description'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Create a new Pull Request.
-
-## License
-
-This project is licensed under the MIT License. See `LICENSE` for more details.
