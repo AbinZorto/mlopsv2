@@ -216,6 +216,77 @@ To run the pipeline:
 3. **Deploy to Production**: After successful staging validation, use the production pipelines to deploy the model into the production environment.
 4. **Register Models**: Use the registration pipelines to handle the registration of models in the respective environments.
 
+aml-cli-v2/
+  ├── allocate-traffic.yml              # YAML template for allocating traffic between model versions.
+  ├── connect-to-workspace.yml          # Template to connect to an Azure ML workspace.
+  ├── create-compute.yml                # Template to create necessary Azure ML compute resources.
+  ├── create-deployment.yml              # YAML file to handle the deployment of models.
+  ├── create-endpoint.yml               # Template to create endpoints for deployed models.
+  ├── install-aml-cli.yml               # Template to install Azure Machine Learning CLI.
+  ├── install-az-cli.yml                # Template to install Azure CLI.
+  ├── register-data.yml                 # Template to register datasets in Azure ML.
+  ├── register-environment.yml          # Template to register environments in Azure ML.
+  ├── run-pipeline.yml                  # Template to run the main pipeline.
+  ├── test-deployment.yml               # Template for testing the deployment of models.
+
+data-science/
+  ├── data/                              # Directory for datasets used in the project.
+  │   ├── batch.csv                     # Batch input dataset for model training.
+  │   ├── data.csv                      # Main dataset for training and evaluation.
+  │   ├── data.yml                      # YAML file containing metadata for the main dataset.
+  │   ├── request.json                  # Sample request file for batch scoring.
+  │   ├── stage.csv                     # Dataset for staging environment.
+  │   └── stage.yml                     # YAML file containing metadata for the staging dataset.
+  ├── environment/                       # Directory for environment configurations.
+  │   ├── automl-conda.yml              # Conda environment configuration for AutoML.
+  │   ├── automl-env.yml                # YAML file for the AutoML environment.
+  │   ├── train-conda.yml               # Conda environment configuration for training.
+  │   └── train-env.yml                 # YAML file for the training environment.
+  ├── src/                               # Source code for the project.
+  │   ├── evaluate.py                   # Script to evaluate the performance of models.
+  │   ├── prep.py                       # Script for data preparation and preprocessing.
+  │   ├── register.py                   # Script to register trained models in Azure ML.
+  │   ├── stageprep.py                  # Script for staging-specific data preparation.
+  │   ├── train.py                      # Script for training models using AutoML.
+  │   └── train2.py                     # Script for training models using RandomForestRegressor.
+
+infrastructure/
+  ├── env-variables/                     # Directory for environment variable configurations.
+  │   ├── config-infra-dev.yml          # Configuration file for the Dev environment.
+  │   ├── config-infra-prod.yml         # Configuration file for the Prod environment.
+  │   └── config-infra-stage.yml        # Configuration file for the Stage environment.
+  ├── modules/                           # Bicep modules for infrastructure setup.
+  │   ├── aml_computecluster.bicep      # Bicep template for creating AML compute clusters.
+  │   ├── aml_workspace.bicep           # Bicep template for creating AML workspaces.
+  │   ├── application_insights.bicep    # Bicep template for setting up Application Insights.
+  │   ├── container_registry.bicep       # Bicep template for creating a container registry.
+  │   ├── key_vault.bicep               # Bicep template for creating Azure Key Vault.
+  │   └── storage_account.bicep          # Bicep template for creating a storage account.
+  ├── pipelines/                         # Directory for infrastructure deployment pipelines.
+  │   └── bicep-ado-deploy-infra.yml    # YAML template for deploying infrastructure using Bicep.
+
+mlops-pipelines/
+  ├── deploy/                            # Directory for deployment pipelines.
+  │   ├── batch/                         # Subdirectory for batch deployment pipelines.
+  │   │   ├── batch-deployment.yml       # Pipeline for deploying batch models.
+  │   │   └── batch-endpoint.yml         # Pipeline for setting up batch endpoints.
+  │   └── online/                        # Subdirectory for online deployment pipelines.
+  │       ├── online-deployment.yml      # Pipeline for deploying online models.
+  │       └── online-endpoint.yml        # Pipeline for setting up online endpoints.
+  ├── evaluate/                          # Directory for evaluation pipelines.
+  │   ├── test/                          # Subdirectory for testing pipelines.
+  │   │   └── stage-test.yml             # Pipeline for testing models in the staging environment.
+  │   └── train/                         # Subdirectory for training pipelines.
+  │       └── dev-train.yml              # Pipeline for training models in the development environment.
+  ├── dev-model-training.yml             # Main development model training pipeline.
+  ├── prod-batch-endpoint.yml            # Production batch endpoint deployment pipeline.
+  ├── prod-online-endpoint.yml           # Production online endpoint deployment pipeline.
+  ├── prod-register-in-production.yml     # Production model registration pipeline.
+  ├── stage-batch-endpoint.yml           # Staging batch endpoint deployment pipeline.
+  ├── stage-model-testing.yml             # Staging model testing pipeline.
+  ├── stage-online-endpoint.yml           # Staging online endpoint deployment pipeline.
+  └── stage-register-in-staging.yml       # Staging model registration pipeline.
+  
 ## Contributing
 
 To contribute:
