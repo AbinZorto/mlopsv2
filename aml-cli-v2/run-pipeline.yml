@@ -1,0 +1,64 @@
+steps:
+  - task: AzureCLI@2
+    displayName: Run Azure ML pipeline
+    continueOnError: true
+    inputs: 
+      azureSubscription: $(ado_service_connection_rg)
+      scriptType: bash
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      scriptLocation: inlineScript
+      inlineScript: |
+        # Check if the virtual environment exists, create if it doesn't
+        if [ ! -d ~/myagent/$(virtual_environment) ]; then
+          echo "Creating virtual environment $(virtual_environment)"
+          python3 -m venv ~/myagent/$(virtual_environment)
+        else
+          echo "Virtual environment $(virtual_environment) already exists"
+        fi
+
+        # Activate the virtual environment
+        source ~/myagent/$(virtual_environment)/bin/activate
+
+        # Install or update the Azure ML CLI extension
+        az extension add --name ml --upgrade --yes
+
+        az version
+        az extension list
+
+        # Check if 'ml' extension is installed
+        if ! az extension show --name ml &> /dev/null; then
+          echo "Failed to install 'ml' extension. Exiting."
+          exit 1
+        fi
+
+        run_id=$(az ml job create -f ${{ parameters.pipeline_file }} \
+          --set experiment_name=${{ parameters.experiment_name }} \
+          --set inputs.enable_monitoring=${{ parameters.enable_monitoring }} \
+          --set inputs.modelname=${{ parameters.modelname }} \
+          display_name=${{ parameters.display_name }} --query name -o tsv)
+        if [[ -z "$run_id" ]]
+        then
+          echo "Job creation failed"
+          exit 3
+        fi
+        az ml job show -n $run_id --web
+        status=$(az ml job show -n $run_id --query status -o tsv)
+        if [[ -z "$status" ]]
+        then
+          echo "Status query failed"
+          exit 4
+        fi
+        running=("NotStarted" "Queued" "Starting" "Preparing" "Running" "Finalizing" "CancelRequested")
+        while [[ ${running[*]} =~ $status ]]
+        do
+          sleep 15 
+          status=$(az ml job show -n $run_id --query status -o tsv)
+          echo $status
+        done
+        if [[ "$status" != "Completed" ]]  
+        then
+          echo "Training Job failed or canceled"
+          exit 3
+        fi
+    env:
+      PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)

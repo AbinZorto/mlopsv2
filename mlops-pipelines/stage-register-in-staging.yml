@@ -1,0 +1,393 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: register-in-staging
+
+variables:
+  - template: ../infrastructure/env-variables/config-infra-dev.yml
+  
+trigger: none
+
+pool:
+  name: Default
+
+stages:
+  - stage: DownloadLatestModelFromDev
+    displayName: Download Latest Model from Dev
+    jobs:
+      - job: DownloadModel
+        steps:
+          - task: AzureCLI@2
+            displayName: Install AZ ML dependencies
+            inputs:
+              azureSubscription: 'Azure-ARM-Dev'
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(System.DefaultWorkingDirectory)
+              inlineScript: |
+                set -e # fail on error
+                
+                # Check if the virtual environment exists, create if it doesn't
+                if [ ! -d ~/myagent/$(virtual_environment) ]; then
+                  echo "Creating virtual environment $(virtual_environment)"
+                  python3 -m venv ~/myagent/$(virtual_environment)
+                else
+                  echo "Virtual environment $(virtual_environment) already exists"
+                fi
+
+                # Check if we're in the virtual environment, activate only if needed
+                if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+                  echo "Activating $(virtual_environment) virtual environment"
+                  source ~/myagent/$(virtual_environment)/bin/activate
+                else
+                  echo "Already in $(virtual_environment) virtual environment"
+                fi
+                
+                echo "Python version: $(python --version)"
+                echo "Pip version: $(pip --version)"
+
+                # Upgrade pip, setuptools, and wheel
+                python -m pip install --upgrade pip setuptools wheel
+                # Install or upgrade azure-cli
+                python -m pip install --upgrade azure-cli
+
+                # Function to compare versions
+                version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
+
+                # Function to check and install package
+                check_and_install() {
+                  package=$1
+                  required_version=$2
+                  installed_version=$(pip show $package 2>/dev/null | grep Version | cut -d ' ' -f 2)
+                  
+                  if [ -z "$installed_version" ]; then
+                    echo "Installing $package $required_version"
+                    pip install "$package==$required_version"
+                  elif version_gt $required_version $installed_version; then
+                    echo "Updating $package from $installed_version to $required_version"
+                    pip install --upgrade "$package==$required_version"
+                  else
+                    echo "$package is already at version $installed_version (required: $required_version)"
+                  fi
+                }
+
+                # List of packages and their required versions
+                packages="azure-ai-ml:1.1.0 azure-common:1.1.28 azure-core:1.26.1 azure-identity:1.10.0 azure-mgmt-core:1.3.0 azure-storage-blob:12.14.1 azure-storage-file-datalake:12.9.1 azure-storage-file-share:12.7.0"
+
+                # Check and install packages if necessary
+                echo "$packages" | tr ' ' '\n' | while IFS=':' read -r package version; do
+                  check_and_install "$package" "$version"
+                done
+
+                # Update these packages to latest versions
+                pip install --upgrade pyOpenSSL cryptography requests
+
+                # Display Azure CLI version
+                az version
+
+                echo "Azure CLI and dependencies installation completed."
+
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+          - task: AzureCLI@2
+            displayName: Install AML CLI v2
+            inputs:
+              azureSubscription: 'Azure-ARM-Dev'
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(System.DefaultWorkingDirectory)
+              inlineScript: |
+                set -e # fail on error
+                
+                # Check if we're in the virtual environment, activate only if needed
+                if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+                  echo "Activating $(virtual_environment) virtual environment"
+                  source ~/myagent/$(virtual_environment)/bin/activate
+                else
+                  echo "Already in $(virtual_environment) virtual environment"
+                fi
+                
+                echo "Python version: $(python --version)"
+                echo "Pip version: $(pip --version)"
+
+                # Display Azure CLI version
+                az version
+
+                # Add and update the ml extension
+                az extension  add -n ml
+
+                # List all extensions
+                az extension list
+
+                echo "AML CLI v2 installation completed."
+
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+              
+          - task: AzureCLI@2
+            displayName: Connect to AML Workspace using CLI v2
+            inputs:
+              azureSubscription: 'Azure-ARM-Dev'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az configure --defaults group=rg-$(Build.Repository.Name)-0001dev workspace=mlw-$(Build.Repository.Name)-0001dev
+                currentId=$(az account show -o tsv --query id | tr -d '"\r')
+                echo "##vso[task.setvariable variable=subscription_id;]$currentId"
+                JSON_STRING=$'{\n\t"subscription_id": "%s",\n\t"resource_group": "%s",\n\t"workspace_name": "%s"\n}'
+                printf "$JSON_STRING" "$currentId" "rg-$(Build.Repository.Name)-0001dev" "mlw-$(Build.Repository.Name)-0001dev"
+                printf "$JSON_STRING" "$currentId" "rg-$(Build.Repository.Name)-0001dev" "mlw-$(Build.Repository.Name)-0001dev" > config.json
+          - task: AzureCLI@2
+            displayName: 'Download Latest Model from Dev'
+            inputs:
+              azureSubscription: 'Azure-ARM-Dev'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                set -e # fail on error
+                
+                # Check if the virtual environment exists, create if it doesn't
+                if [ ! -d ~/myagent/$(virtual_environment) ]; then
+                  echo "Creating virtual environment $(virtual_environment)"
+                  python3 -m venv ~/myagent/$(virtual_environment)
+                else
+                  echo "Virtual environment $(virtual_environment) already exists"
+                fi
+                # Check if we're in the virtual environment, activate only if needed
+                if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+                  echo "Activating $(virtual_environment) virtual environment"
+                  source ~/myagent/$(virtual_environment)/bin/activate
+                else
+                  echo "Already in $(virtual_environment) virtual environment"
+                fi
+                #!/bin/bash
+
+                # Set the model name
+                MODEL_NAME="$(ds_environment)-model"
+
+                echo "Fetching the latest version of model: $MODEL_NAME"
+
+                # Get the latest version of the model
+                latest_version=$(az ml model list \
+                    --resource-group rg-$(Build.Repository.Name)-0001dev \
+                    --workspace-name mlw-$(Build.Repository.Name)-0001dev \
+                    --name $MODEL_NAME \
+                    --query "max_by([], &version).version" \
+                    -o tsv)
+
+                if [ -z "$latest_version" ]; then
+                    echo "Error: Unable to fetch the latest version for model $MODEL_NAME"
+                    exit 1
+                fi
+
+                echo "Latest version of $MODEL_NAME is: $latest_version"
+
+                echo "Attempting to download the latest version of the model"
+
+                az ml model download \
+                    --resource-group rg-$(Build.Repository.Name)-0001dev \
+                    --workspace-name mlw-$(Build.Repository.Name)-0001dev \
+                    --name $MODEL_NAME \
+                    --version $latest_version \
+                    --download-path "$(Build.ArtifactStagingDirectory)/model"
+
+                if [ $? -ne 0 ]; then
+                    echo "Error: Failed to download the latest version of the model. Please check the model availability and permissions."
+                    echo "Attempting to get more information about the model..."
+                    
+                    az ml model show \
+                        --resource-group rg-$(Build.Repository.Name)-0001dev \
+                        --workspace-name mlw-$(Build.Repository.Name)-0001dev \
+                        --name $MODEL_NAME \
+                        --version $latest_version
+
+                    exit 1
+                fi
+
+                echo "Model downloaded successfully to: $(Build.ArtifactStagingDirectory)/model"
+                echo "Contents of downloaded directory:"
+                ls -R $(Build.ArtifactStagingDirectory)/model
+
+                # Verify the downloaded model
+                echo "Model details:"
+                az ml model show \
+                    --resource-group rg-$(Build.Repository.Name)-0001dev \
+                    --workspace-name mlw-$(Build.Repository.Name)-0001dev \
+                    --name $MODEL_NAME \
+                    --version $latest_version
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+
+          - publish: $(Build.ArtifactStagingDirectory)/model
+            artifact: latestTrainedModel
+            displayName: 'Publish Latest Trained Model'
+
+  - stage: RegisterModelInStaging
+    displayName: Register Model in Staging Environment
+    dependsOn: DownloadLatestModelFromDev
+    jobs:
+      - job: RegisterModel
+        steps:
+          - checkout: self
+            path: s/
+          - download: current
+            artifact: latestTrainedModel
+            displayName: 'Download Latest Trained Model'
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo "Contents of $(Pipeline.Workspace)/latestTrainedModel:"
+                ls -R $(Pipeline.Workspace)/latestTrainedModel
+            displayName: 'Debug: List Downloaded Artifact Contents'
+          - task: AzureCLI@2
+            displayName: Install AZ ML dependencies
+            inputs:
+              azureSubscription: 'Azure-ARM-Stage'
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(System.DefaultWorkingDirectory)
+              inlineScript: |
+                set -e # fail on error
+                
+                # Check if the virtual environment exists, create if it doesn't
+                if [ ! -d ~/myagent/$(virtual_environment) ]; then
+                  echo "Creating virtual environment $(virtual_environment)"
+                  python3 -m venv ~/myagent/$(virtual_environment)
+                else
+                  echo "Virtual environment $(virtual_environment) already exists"
+                fi
+
+                # Check if we're in the virtual environment, activate only if needed
+                if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+                  echo "Activating $(virtual_environment) virtual environment"
+                  source ~/myagent/$(virtual_environment)/bin/activate
+                else
+                  echo "Already in $(virtual_environment) virtual environment"
+                fi
+                
+                echo "Python version: $(python --version)"
+                echo "Pip version: $(pip --version)"
+
+                # Upgrade pip, setuptools, and wheel
+                python -m pip install --upgrade pip setuptools wheel
+                # Install or upgrade azure-cli
+                python -m pip install --upgrade azure-cli
+
+                # Function to compare versions
+                version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
+
+                # Function to check and install package
+                check_and_install() {
+                  package=$1
+                  required_version=$2
+                  installed_version=$(pip show $package 2>/dev/null | grep Version | cut -d ' ' -f 2)
+                  
+                  if [ -z "$installed_version" ]; then
+                    echo "Installing $package $required_version"
+                    pip install "$package==$required_version"
+                  elif version_gt $required_version $installed_version; then
+                    echo "Updating $package from $installed_version to $required_version"
+                    pip install --upgrade "$package==$required_version"
+                  else
+                    echo "$package is already at version $installed_version (required: $required_version)"
+                  fi
+                }
+
+                # List of packages and their required versions
+                packages="azure-ai-ml:1.1.0 azure-common:1.1.28 azure-core:1.26.1 azure-identity:1.10.0 azure-mgmt-core:1.3.0 azure-storage-blob:12.14.1 azure-storage-file-datalake:12.9.1 azure-storage-file-share:12.7.0"
+
+                # Check and install packages if necessary
+                echo "$packages" | tr ' ' '\n' | while IFS=':' read -r package version; do
+                  check_and_install "$package" "$version"
+                done
+
+                # Update these packages to latest versions
+                pip install --upgrade pyOpenSSL cryptography requests
+
+                # Display Azure CLI version
+                az version
+
+                echo "Azure CLI and dependencies installation completed."
+
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+          - task: AzureCLI@2
+            displayName: Install AML CLI v2
+            inputs:
+              azureSubscription: 'Azure-ARM-Stage'
+              scriptType: bash
+              scriptLocation: inlineScript
+              workingDirectory: $(System.DefaultWorkingDirectory)
+              inlineScript: |
+                set -e # fail on error
+                
+                # Check if we're in the virtual environment, activate only if needed
+                if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+                  echo "Activating $(virtual_environment) virtual environment"
+                  source ~/myagent/$(virtual_environment)/bin/activate
+                else
+                  echo "Already in $(virtual_environment) virtual environment"
+                fi
+                
+                echo "Python version: $(python --version)"
+                echo "Pip version: $(pip --version)"
+
+                # Display Azure CLI version
+                az version
+
+                # Add and update the ml extension
+                az extension  add -n ml
+
+                # List all extensions
+                az extension list
+
+                echo "AML CLI v2 installation completed."
+
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+
+          - task: AzureCLI@2
+            displayName: Connect to Workspace using CLI v2
+            inputs:
+              azureSubscription: 'Azure-ARM-Stage'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az configure --defaults group=rg-$(Build.Repository.Name)-0001stage workspace=mlw-$(Build.Repository.Name)-0001stage
+                currentId=$(az account show -o tsv --query id | tr -d '"\r')
+                echo "##vso[task.setvariable variable=subscription_id;]$currentId"
+                JSON_STRING=$'{\n\t"subscription_id": "%s",\n\t"resource_group": "%s",\n\t"workspace_name": "%s"\n}'
+                printf "$JSON_STRING" "$currentId" "rg-$(Build.Repository.Name)-0001stage" "mlw-$(Build.Repository.Name)-0001stage"
+                printf "$JSON_STRING" "$currentId" "rg-$(Build.Repository.Name)-0001stage" "mlw-$(Build.Repository.Name)-0001stage" > config.json
+          - task: AzureCLI@2
+            displayName: 'Register Model in Staging'
+            inputs:
+              azureSubscription: 'Azure-ARM-Stage'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Check if the virtual environment exists, create if it doesn't
+                if [ ! -d ~/myagent/$(virtual_environment) ]; then
+                  echo "Creating virtual environment $(virtual_environment)"
+                  python3 -m venv ~/myagent/$(virtual_environment)
+                else
+                  echo "Virtual environment $(virtual_environment) already exists"
+                fi
+                # Activate the virtual environment
+                echo "Activating $(virtual_environment) virtual environment"
+                source ~/myagent/$(virtual_environment)/bin/activate                
+                model_dir=$(Pipeline.Workspace)/latestTrainedModel/automl-model/automl-model
+                
+                if [ ! -d "$model_dir" ]; then
+                  echo "Error: MLflow model directory not found"
+                  exit 1
+                fi
+                
+                az ml model create \
+                  --name "$(ds_environment)-model" \
+                  --path "$model_dir" \
+                  --type "mlflow_model"
+            env:
+              PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)
+

@@ -1,0 +1,50 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. Test 1
+
+name: stage-model-testing
+
+variables:
+  - template: ../infrastructure/env-variables/config-infra-stage.yml
+  - name: version
+    value: aml-cli-v2
+  - name: modelname
+    value: automl
+
+trigger: none
+
+pool:
+  name: Default
+
+stages:
+  - stage: EvaluateModelInStage
+    displayName: Evaluate Model in Stage Environment
+    jobs:
+      - job: EvaluateModel
+        timeoutInMinutes: 60
+        steps:
+          - template: ../aml-cli-v2/install-az-cli.yml
+          - template: ../aml-cli-v2/install-aml-cli.yml
+          - template: ../aml-cli-v2/connect-to-workspace.yml
+          - template: ../aml-cli-v2/register-environment.yml
+            parameters:
+              environment_name: $(ds_environment)-env
+              environment_file: $(Build.SourcesDirectory)/data-science/environment/$(ds_environment)-env.yml
+          - template: ../aml-cli-v2/create-compute.yml
+            parameters:
+              cluster_name: cpu-cluster
+              size: Standard_DS3_v2
+              min_instances: 0
+              max_instances: 4
+              cluster_tier: low_priority
+          - template: ../aml-cli-v2/register-data.yml
+            parameters:
+              data_type: uri_file
+              data_name: data
+              data_file: $(ds_data)
+          - template: ../aml-cli-v2/run-pipeline.yml
+            parameters:
+              pipeline_file: $(pipeline_file)
+              experiment_name: stage_$(Build.Repository.Name)_evaluate_$(Build.SourceBranchName)
+              display_name: stage_$(Build.Repository.Name)_run_$(Build.BuildID)
+              enable_monitoring: $(enable_monitoring)
+              modelname: ${{ variables.modelname }}

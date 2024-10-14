@@ -1,0 +1,63 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: $(Build.Repository.Name)-evaluation
+description: Evaluation Pipeline to evaluate the latest model for $(Build.Repository.Name) price prediction
+
+inputs:
+  input:
+    type: uri_file
+    path: azureml:data@latest
+  enable_monitoring:
+    type: boolean
+  modelname:
+    type: string
+  table_name: 'monitoring'
+  model_input:
+    type: mlflow_model
+    path: azureml:automl-model@latest
+
+outputs:
+  test_data:
+  evaluation_output:
+
+settings:
+  default_datastore: azureml:workspaceblobstore
+  default_compute: azureml:cpu-cluster
+  continue_on_step_failure: false
+
+jobs:
+  prep_data:
+    name: prep_data
+    display_name: prep-data
+    code: ../../../data-science/src
+    command: >-
+      python stageprep.py
+      --raw_data ${{inputs.raw_data}}
+      --test_data ${{outputs.test_data}}
+      --enable_monitoring ${{inputs.enable_monitoring}}
+      --table_name ${{inputs.table_name}}
+    environment: azureml:automl-env@latest
+    inputs:
+      raw_data: ${{parent.inputs.input}}
+      enable_monitoring: ${{parent.inputs.enable_monitoring}}
+      table_name: ${{parent.inputs.table_name}}
+    outputs:
+      test_data: ${{parent.outputs.test_data}}
+
+  evaluate_model:
+    name: evaluate_model
+    display_name: evaluate-model
+    code: ../../../data-science/src
+    command: >-
+      python evaluate.py
+      --model_name ${{inputs.model_name}}
+      --model_input ${{inputs.model_input}}
+      --test_data ${{inputs.test_data}}
+      --evaluation_output ${{outputs.evaluation_output}}
+    environment: azureml:automl-env@latest
+    inputs:
+      model_input: ${{parent.inputs.model_input}}
+      model_name: "${{parent.inputs.modelname}}-model"
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+    outputs:
+      evaluation_output: ${{parent.outputs.evaluation_output}}

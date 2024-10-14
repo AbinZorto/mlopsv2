@@ -1,0 +1,35 @@
+steps:
+  - task: AzureCLI@2
+    displayName: Install AML CLI v2
+    inputs:
+      azureSubscription: $(ado_service_connection_aml_ws)
+      scriptType: bash
+      scriptLocation: inlineScript
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      inlineScript: |
+        set -e # fail on error
+        
+        # Check if we're in the virtual environment, activate only if needed
+        if [[ "$VIRTUAL_ENV" != */myagent/$(virtual_environment) ]]; then
+          echo "Activating $(virtual_environment) virtual environment"
+          source ~/myagent/$(virtual_environment)/bin/activate
+        else
+          echo "Already in $(virtual_environment) virtual environment"
+        fi
+        
+        echo "Python version: $(python --version)"
+        echo "Pip version: $(pip --version)"
+
+        # Display Azure CLI version
+        az version
+
+        # Add and update the ml extension
+        az extension  add -n ml
+
+        # List all extensions
+        az extension list
+
+        echo "AML CLI v2 installation completed."
+
+    env:
+      PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)

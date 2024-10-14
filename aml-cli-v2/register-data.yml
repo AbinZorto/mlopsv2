@@ -1,0 +1,37 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+parameters:
+- name: data_type
+  type: string
+- name: data_name
+  type: string
+- name: data_file
+  type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Register Azure ML data asset
+    continueOnError: true
+    inputs: 
+      azureSubscription: $(ado_service_connection_rg) #needs to have access at the RG level 
+      scriptType: bash
+      workingDirectory: $(System.DefaultWorkingDirectory)
+      scriptLocation: inlineScript
+      inlineScript: |
+        # Check if the virtual environment exists, create if it doesn't
+        if [ ! -d ~/myagent/$(virtual_environment) ]; then
+          echo "Creating virtual environment $(virtual_environment)"
+          python3 -m venv ~/myagent/$(virtual_environment)
+        else
+          echo "Virtual environment $(virtual_environment) already exists"
+        fi
+
+        # Activate the virtual environment
+        echo "Activating $(virtual_environment) virtual environment"
+        source ~/myagent/$(virtual_environment)/bin/activate
+
+        az ml data create --file ${{ parameters.data_file }} --name ${{ parameters.data_name }} --type ${{ parameters.data_type }}
+
+    env:
+      PYTHONPATH: ~/myagent/$(virtual_environment)/lib/python3.12/site-packages:$(PYTHONPATH)

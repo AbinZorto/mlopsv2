@@ -1,0 +1,48 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+name: batch-endpoint
+
+variables:
+  - template: ../../infrastructure/env-variables/config-infra-stage.yml
+  - name: version
+    value: aml-cli-v2
+  - name: endpoint_name
+    value: $(Build.Repository.Name)-batch-$(namespace)$(postfix)$(environment)
+  - name: endpoint_type
+    value: batch
+
+trigger: none
+
+pool:
+  name: Default
+
+stages:
+  - stage: CreateBatchEndpoint
+    displayName: Create/Update Batch Endpoint
+    jobs:
+      - job: DeployBatchEndpoint
+        steps:
+          - template: ../aml-cli-v2/install-az-cli.yml
+          - template: ../aml-cli-v2/install-aml-cli.yml
+          - template: ../aml-cli-v2/connect-to-workspace.yml
+          - template: ../aml-cli-v2/create-compute.yml
+            parameters:
+              cluster_name: batch-cluster # name must match cluster name in deployment file below
+              size: STANDARD_DS3_V2
+              min_instances: 0
+              max_instances: 5
+              cluster_tier: dedicated
+          - template: ../aml-cli-v2/create-endpoint.yml
+            parameters:
+              endpoint_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/batch/batch-endpoint.yml
+          - template: ../aml-cli-v2/create-deployment.yml
+            parameters:
+              deployment_name: $(Build.Repository.Name)-batch-dp
+              deployment_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/batch/batch-deployment.yml
+          - template: ../aml-cli-v2/test-deployment.yml
+            parameters:
+              deployment_name: $(Build.Repository.Name)-batch-dp
+              sample_request: $(Build.SourcesDirectory)/data-science/data/batch.csv
+              request_type: uri_file #either uri_folder or uri_file
+
