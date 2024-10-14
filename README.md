@@ -216,6 +216,9 @@ To run the pipeline:
 3. **Deploy to Production**: After successful staging validation, use the production pipelines to deploy the model into the production environment.
 4. **Register Models**: Use the registration pipelines to handle the registration of models in the respective environments.
 
+## Directory Structure
+
+```plaintext
 aml-cli-v2/
   ├── allocate-traffic.yml              # YAML template for allocating traffic between model versions.
   ├── connect-to-workspace.yml          # Template to connect to an Azure ML workspace.
@@ -286,6 +289,7 @@ mlops-pipelines/
   ├── stage-model-testing.yml             # Staging model testing pipeline.
   ├── stage-online-endpoint.yml           # Staging online endpoint deployment pipeline.
   └── stage-register-in-staging.yml       # Staging model registration pipeline.
+```
   
 ## Contributing
 
