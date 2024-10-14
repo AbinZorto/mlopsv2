@@ -19,6 +19,7 @@ This repository is based on the mlopsv2 accelerator repo by the Azure team https
 10. [Usage](#usage)
 11. [Contributing](#contributing)
 12. [License](#license)
+13. [Directory Structure](#directory-structure)
 
 ## Getting Started
 
