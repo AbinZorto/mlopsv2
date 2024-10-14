@@ -28,7 +28,7 @@ This repository is designed for deploying and managing machine learning models u
 
 Before running the pipeline, ensure that you have the following:
 
-- **Self-hosted Azure DevOps Agent**: A self-hosted system to run Azure DevOps pipelines.
+- **Self-hosted Azure DevOps Agent**: A self-hosted system to run Azure DevOps pipelines. (this repo uses a macos selfhosted agent) https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/osx-agent?view=azure-devops
 - **Azure Subscription**: Access to necessary Azure Machine Learning resources.
 - **Python 3.12** installed on the self-hosted system.
 - **Azure CLI** and **AML CLI**, which will be installed automatically by the pipeline templates.
