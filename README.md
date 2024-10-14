@@ -253,7 +253,7 @@ data-science/
   │   ├── data.csv                      # Main dataset for training and evaluation.
   │   ├── data.yml                      # YAML file containing metadata for the main dataset.
   │   ├── request.json                  # Sample request file for batch scoring.
-  │   ├── stage.csv                     # Dataset for staging environment.
+  │   ├── stage.csv                     # Test Dataset for staging environment.
   │   └── stage.yml                     # YAML file containing metadata for the staging dataset.
   ├── environment/                       # Directory for environment configurations.
   │   ├── automl-conda.yml              # Conda environment configuration for AutoML.
