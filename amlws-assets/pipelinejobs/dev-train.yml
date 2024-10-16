@@ -33,7 +33,7 @@ jobs:
   prep_data:
     name: prep_data
     display_name: prep-data
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python prep.py
       --raw_data ${{inputs.raw_data}}
@@ -55,7 +55,7 @@ jobs:
   train_model:
     name: train_model
     display_name: train-model
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python train.py
       --modelname ${{inputs.modelname}}
@@ -71,7 +71,7 @@ jobs:
   evaluate_model:
     name: evaluate_model
     display_name: evaluate-model
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python evaluate.py
       --model_name ${{inputs.model_name}}
@@ -89,7 +89,7 @@ jobs:
   register_model:
     name: register_model
     display_name: register-model
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python register.py
       --model_name ${{inputs.model_name}}

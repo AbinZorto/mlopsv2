@@ -36,7 +36,7 @@ Before running the pipeline, ensure that you have the following:
 
 ## Installation and Setup
 
-The templates in the `aml-cli-v2` folder handle most of the installation and setup steps automatically.
+The templates in the `aml-cli-v2-templates` folder handle most of the installation and setup steps automatically.
 
 - **Azure CLI and AML CLI**: Use `install-az-cli.yml` and `install-aml-cli.yml` to install Azure CLI, AML CLI, and required extensions.
 - **Compute Cluster**: The `create-compute.yml` template ensures that the necessary Azure Machine Learning compute resources are provisioned.
@@ -98,7 +98,7 @@ Once the environments are created, you are ready to deploy your Azure Machine Le
 ## Directory Structure
 
 ```plaintext
-aml-cli-v2/
+aml-cli-v2-templates/
   ├── allocate-traffic.yml              # YAML template for allocating traffic between model versions.
   ├── connect-to-workspace.yml          # Template to connect to an Azure ML workspace.
   ├── create-compute.yml                # Template to create necessary Azure ML compute resources.
@@ -111,7 +111,7 @@ aml-cli-v2/
   ├── run-pipeline.yml                  # Template to run the main pipeline.
   ├── test-deployment.yml               # Template for testing the deployment of models.
 
-data-science/
+amlws-assets/
   ├── data/                              # Directory for datasets used in the project.
   │   ├── batch.csv                     # Batch input dataset for model training.
   │   ├── data.csv                      # Main dataset for training and evaluation.
@@ -174,10 +174,10 @@ mlops-pipelines/
 
 The repository is organized into several key directories:
 
-### aml-cli-v2/
+### aml-cli-v2-templates/
 Contains YAML templates for managing Azure resources, including the creation of compute resources, deployments, and connections to the Azure Machine Learning workspace.
 
-### data-science/
+### amlws-assets/
 This directory includes all components related to data preparation and model training:
 - **data/**: Contains datasets used for training and evaluation, along with metadata files.
 - **environment/**: Holds configurations for the Conda environments used in training and AutoML.

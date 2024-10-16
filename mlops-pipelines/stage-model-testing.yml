@@ -6,7 +6,7 @@ name: stage-model-testing
 variables:
   - template: ../infrastructure/env-variables/config-infra-stage.yml
   - name: version
-    value: aml-cli-v2
+    value: aml-cli-v2-templates
   - name: modelname
     value: automl
 
@@ -22,26 +22,26 @@ stages:
       - job: EvaluateModel
         timeoutInMinutes: 60
         steps:
-          - template: ../aml-cli-v2/install-az-cli.yml
-          - template: ../aml-cli-v2/install-aml-cli.yml
-          - template: ../aml-cli-v2/connect-to-workspace.yml
-          - template: ../aml-cli-v2/register-environment.yml
+          - template: ../aml-cli-v2-templates/install-az-cli.yml
+          - template: ../aml-cli-v2-templates/install-aml-cli.yml
+          - template: ../aml-cli-v2-templates/connect-to-workspace.yml
+          - template: ../aml-cli-v2-templates/register-environment.yml
             parameters:
               environment_name: $(ds_environment)-env
-              environment_file: $(Build.SourcesDirectory)/data-science/environment/$(ds_environment)-env.yml
-          - template: ../aml-cli-v2/create-compute.yml
+              environment_file: $(Build.SourcesDirectory)/amlws-assets/environment/$(ds_environment)-env.yml
+          - template: ../aml-cli-v2-templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
               size: Standard_DS3_v2
               min_instances: 0
               max_instances: 4
               cluster_tier: low_priority
-          - template: ../aml-cli-v2/register-data.yml
+          - template: ../aml-cli-v2-templates/register-data.yml
             parameters:
               data_type: uri_file
               data_name: data
               data_file: $(ds_data)
-          - template: ../aml-cli-v2/run-pipeline.yml
+          - template: ../aml-cli-v2-templates/run-pipeline.yml
             parameters:
               pipeline_file: $(pipeline_file)
               experiment_name: stage_$(Build.Repository.Name)_evaluate_$(Build.SourceBranchName)

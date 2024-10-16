@@ -12,9 +12,9 @@ variables:
   environment: dev
   enable_aml_computecluster: true
   enable_monitoring: false
-  ds_data: $(Build.SourcesDirectory)/data-science/data/data.yml
+  ds_data: $(Build.SourcesDirectory)/amlws-assets/data/data.yml
   ds_environment: automl
-  pipeline_file: $(Build.SourcesDirectory)/mlops-pipelines/evaluate/train/dev-train.yml
+  pipeline_file: $(Build.SourcesDirectory)/amlws-assets/pipelinejobs/dev-train.yml
   virtual_environment: azure
 
   # Azure DevOps

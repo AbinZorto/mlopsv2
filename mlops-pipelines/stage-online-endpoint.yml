@@ -23,21 +23,21 @@ stages:
     jobs:
       - job: DeployOnlineEndpoint
         steps:
-          - template: ../aml-cli-v2/install-az-cli.yml
-          - template: ../aml-cli-v2/install-aml-cli.yml
-          - template: ../aml-cli-v2/connect-to-workspace.yml
-          - template: ../aml-cli-v2/create-endpoint.yml
+          - template: ../aml-cli-v2-templates/install-az-cli.yml
+          - template: ../aml-cli-v2-templates/install-aml-cli.yml
+          - template: ../aml-cli-v2-templates/connect-to-workspace.yml
+          - template: ../aml-cli-v2-templates/create-endpoint.yml
             parameters:
               endpoint_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/online/online-endpoint.yml
-          - template: ../aml-cli-v2/create-deployment.yml
+          - template: ../aml-cli-v2-templates/create-deployment.yml
             parameters:
               deployment_name: $(Build.Repository.Name)-online-dp
               deployment_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/online/online-deployment.yml
-          - template: ../aml-cli-v2/allocate-traffic.yml
+          - template: ../aml-cli-v2-templates/allocate-traffic.yml
             parameters:
               traffic_allocation: $(Build.Repository.Name)-online-dp=100
-          - template: ../aml-cli-v2/test-deployment.yml
+          - template: ../aml-cli-v2-templates/test-deployment.yml
             parameters:
               deployment_name: $(Build.Repository.Name)-online-dp
-              sample_request: $(Build.SourcesDirectory)/data-science/data/request.json
+              sample_request: $(Build.SourcesDirectory)/amlws-assets/data/request.json
               request_type: json

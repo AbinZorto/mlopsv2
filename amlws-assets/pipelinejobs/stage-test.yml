@@ -29,7 +29,7 @@ jobs:
   prep_data:
     name: prep_data
     display_name: prep-data
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python stageprep.py
       --raw_data ${{inputs.raw_data}}
@@ -47,7 +47,7 @@ jobs:
   evaluate_model:
     name: evaluate_model
     display_name: evaluate-model
-    code: ../../../data-science/src
+    code: ../src
     command: >-
       python evaluate.py
       --model_name ${{inputs.model_name}}
