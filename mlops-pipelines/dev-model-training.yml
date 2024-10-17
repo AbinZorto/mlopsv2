@@ -18,27 +18,27 @@ stages:
       - job: TrainModel
         timeoutInMinutes: 120
         steps:
-          - template: ../aml-cli-v2-templates/install-az-cli.yml
-          - template: ../aml-cli-v2-templates/install-aml-cli.yml
-          - template: ../aml-cli-v2-templates/connect-to-workspace.yml
-          - template: ../aml-cli-v2-templates/register-environment.yml
+          - template: ../ado-aml-cli-v2-templates/install-az-cli.yml
+          - template: ../ado-aml-cli-v2-templates/install-aml-cli.yml
+          - template: ../ado-aml-cli-v2-templates/connect-to-workspace.yml
+          - template: ../ado-aml-cli-v2-templates/register-environment.yml
             parameters:
               environment_name: $(ds_environment)-env
               environment_file: $(Build.SourcesDirectory)/amlws-assets/environment/$(ds_environment)-env.yml
-          - template: ../aml-cli-v2-templates/create-compute.yml
+          - template: ../ado-aml-cli-v2-templates/create-compute.yml
             parameters:
               cluster_name: cpu-cluster
               size: Standard_DS3_v2
               min_instances: 0
               max_instances: 4
               cluster_tier: low_priority
-          - template: ../aml-cli-v2-templates/register-data.yml
+          - template: ../ado-aml-cli-v2-templates/register-data.yml
             parameters:
               data_type: uri_file
               data_name: data
               data_file: $(ds_data)
-          
-          - template: ../aml-cli-v2-templates/run-pipeline.yml
+
+          - template: ../ado-aml-cli-v2-templates/run-pipeline.yml
             parameters:
               pipeline_file: $(pipeline_file)
               experiment_name: dev_$(Build.Repository.Name)_train_$(Build.SourceBranchName)

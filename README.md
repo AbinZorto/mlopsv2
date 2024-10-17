@@ -3,7 +3,7 @@
 **Description:**  
 This repository provides an Azure DevOps MLOps pipeline template for classical machine learning workflows. It is designed to automate key processes such as model training, evaluation, and deployment using Azure Machine Learning (AML) services. The pipeline operates on a self-hosted system pool instead of Azure's cloud-based pools.
 
-This repository is based on the mlopsv2 accelerator repo by the Azure team https://github.com/Azure/mlops-v2/tree/main. It addresses and gets past certain errors encountered in the repo as well as uses an AutoML training pipeline for classical regression instead of random forest (still kept in train2.py). This is an aml-cli-v2 version focused on classical machine learning using bicep as iac (other versions focused on a different type of machine learning/iac will be implemented at a later date).
+This repository is based on the mlopsv2 accelerator repo by the Azure team https://github.com/Azure/mlops-v2/tree/main. It addresses and gets past certain errors encountered in the repo as well as uses an AutoML training pipeline for classical regression instead of random forest (still kept in train2.py). This is an ado-aml-cli-v2 version focused on classical machine learning using bicep as iac (other versions focused on a different type of machine learning/iac will be implemented at a later date).
 
 ## Table of Contents
 
@@ -14,7 +14,7 @@ This repository is based on the mlopsv2 accelerator repo by the Azure team https
 5. [Creating Azure DevOps Environments](#creating-azure-devops-environments)
 6. [Directory Structure](#directory-structure)
 7. [Project Structure](#project-structure)
-8. [Python Pipeline Overview](#python-pipeline-overview) 
+8. [Python Pipeline Overview](#python-pipeline-overview)
 9. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
 10. [Deploy and Execute Azure Machine Learning Pipelines](#deploy-and-execute-azure-machine-learning-pipelines)
 11. [Usage](#usage)
@@ -36,7 +36,7 @@ Before running the pipeline, ensure that you have the following:
 
 ## Installation and Setup
 
-The templates in the `aml-cli-v2-templates` folder handle most of the installation and setup steps automatically.
+The templates in the `ado-aml-cli-v2-templates` folder handle most of the installation and setup steps automatically.
 
 - **Azure CLI and AML CLI**: Use `install-az-cli.yml` and `install-aml-cli.yml` to install Azure CLI, AML CLI, and required extensions.
 - **Compute Cluster**: The `create-compute.yml` template ensures that the necessary Azure Machine Learning compute resources are provisioned.
@@ -47,6 +47,7 @@ The templates in the `aml-cli-v2-templates` folder handle most of the installati
 For Azure DevOps pipelines to create Azure Machine Learning infrastructure, deploy, and execute AML pipelines, it is necessary to create an Azure service principal for each Azure ML environment (Dev, Stage, and Prod). These service principals can be created using the Azure Cloud Shell:
 
 1. **Launch the Azure Cloud Shell**
+
    - Open the [Azure Cloud Shell](https://shell.azure.com/).
    - If prompted, choose **Bash** as the environment.
    - If this is your first time using Cloud Shell, you will be required to create a storage account for it.
@@ -84,6 +85,7 @@ The pipelines in each branch of your ML project repository will depend on Azure 
 To create the Dev, Stage, and Prod environments:
 
 1. **Create New Environments**
+
    - In Azure DevOps, select Pipeline in the left menu and then select Environments.
    - Select New Environment.
 
@@ -98,7 +100,7 @@ Once the environments are created, you are ready to deploy your Azure Machine Le
 ## Directory Structure
 
 ```plaintext
-aml-cli-v2-templates/
+ado-aml-cli-v2-templates/
   ├── allocate-traffic.yml              # YAML template for allocating traffic between model versions.
   ├── connect-to-workspace.yml          # Template to connect to an Azure ML workspace.
   ├── create-compute.yml                # Template to create necessary Azure ML compute resources.
@@ -172,23 +174,30 @@ mlops-pipelines/
 
 The repository is organized into several key directories:
 
-### aml-cli-v2-templates/
+### ado-aml-cli-v2-templates/
+
 Contains YAML templates for managing Azure resources, including the creation of compute resources, deployments, and connections to the Azure Machine Learning workspace.
 
 ### amlws-assets/
+
 This directory includes all components related to data preparation and model training:
+
 - **data/**: Contains datasets used for training and evaluation, along with metadata files.
 - **environment/**: Holds configurations for the Conda environments used in training and AutoML.
 - **src/**: Contains the main source code scripts responsible for data preparation, training, evaluation, and model registration.
 
 ### infrastructure/
+
 This folder is dedicated to the infrastructure setup for the Azure resources:
+
 - **env-variables/**: Contains configuration files for different environments (Dev, Stage, Prod).
 - **modules/**: Houses Bicep modules for resource creation, such as Azure ML workspaces and compute clusters.
 - **pipelines/**: Includes YAML files for deploying infrastructure using Bicep.
 
 ### mlops-pipelines/
+
 This directory contains the main Azure DevOps pipelines for MLOps processes:
+
 - **deploy/**: Subdirectories for batch and online deployment pipelines, including the necessary YAML files.
 - **evaluate/**: Contains testing and training pipelines for evaluating and training models.
 - **Main Pipelines**: YAML files for development, staging, and production pipelines that automate model training, deployment, and registration.
@@ -200,13 +209,14 @@ This repository includes several Python scripts that handle key stages of the ma
 ### Key Python Scripts
 
 1. **`train.py` - AutoML Training Pipeline**  
-   This script utilizes Azure AutoML to train a classical regression model, selecting the best model and hyperparameters based on the dataset provided. 
+   This script utilizes Azure AutoML to train a classical regression model, selecting the best model and hyperparameters based on the dataset provided.
 
 2. **`train2.py` - Custom RandomForestRegressor Training**  
    This script focuses on training a RandomForest model for regression, allowing manual tuning and feature engineering.
 
 3. **`prep.py` - Data Preparation**  
    This script is responsible for preprocessing the data before it is fed into the training pipelines. Key features include:
+
    - Data Cleaning
    - Feature Engineering
    - Normalization/Scaling
@@ -214,12 +224,14 @@ This repository includes several Python scripts that handle key stages of the ma
 
 4. **`evaluate.py` - Model Evaluation**  
    This script evaluates the performance of trained models based on validation metrics. Key functions include:
+
    - Performance Metrics Calculation
    - Model Comparison
    - Visualization
 
 5. **`register.py` - Model Registration**  
    This script is used to register trained models into the Azure Machine Learning workspace. Key features include:
+
    - Model Versioning
    - Metadata Logging
    - Deployment Preparation
@@ -234,7 +246,6 @@ All these scripts are integrated into the Azure DevOps pipeline, ensuring a seam
 ### Customization Options
 
 - **Data Processing Logic**: Each of the preparation scripts can be customized to include specific data transformations, feature selections, or additional preprocessing steps that are relevant to your use case.
-  
 - **Evaluation Criteria**: You can modify `evaluate.py` to include specific performance metrics that are more aligned with your project's goals.
 
 ## MLOps Pipelines and CI/CD Architecture
@@ -244,9 +255,11 @@ All these scripts are integrated into the Azure DevOps pipeline, ensuring a seam
 The repository includes several pipelines that automate key stages of the machine learning lifecycle:
 
 - **Development Pipeline**
+
   - `dev-model-training.yml`: Automates model training, data registration, and initial evaluation.
 
 - **Staging Pipelines**
+
   - `stage-batch-endpoint.yml`: Deploys models to batch endpoints for staging.
   - `stage-online-endpoint.yml`: Deploys models to online endpoints for real-time inference in staging.
   - `stage-model-testing.yml`: Tests the deployed model in the staging environment.
@@ -271,6 +284,7 @@ The repository is designed around a CI/CD pipeline to streamline the development
 Now that your ML project is created, follow these steps to deploy and execute the pipelines:
 
 1. **Deploy Azure Machine Learning Infrastructure**
+
    - Go to your project repository (e.g., taxi-fare-regression).
    - Customize the `config-infra-dev.yml`, `config-infra-stage.yml`, and `config-infra-prod.yml` files to define unique Azure resource groups and Azure ML workspaces for your project in each environment.
    - Run the infrastructure deployment pipeline (`bicep-ado-deploy-infra.yml`) to deploy the Azure Machine Learning resources (e.g., resource groups, workspaces, compute clusters) for each environment.
@@ -289,7 +303,7 @@ To run the pipeline:
 2. **Deploy to Staging**: Use the staging pipelines to deploy your model to the staging environment.
 3. **Deploy to Production**: After successful staging validation, use the production pipelines to deploy the model into the production environment.
 4. **Register Models**: Use the registration pipelines to handle the registration of models in the respective environments.
-  
+
 ## Contributing
 
 To contribute:
