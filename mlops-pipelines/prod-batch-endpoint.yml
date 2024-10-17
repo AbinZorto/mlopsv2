@@ -35,11 +35,11 @@ stages:
               cluster_tier: dedicated
           - template: ../aml-cli-v2-templates/create-endpoint.yml
             parameters:
-              endpoint_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/batch/batch-endpoint.yml
+              endpoint_file: $(Build.SourcesDirectory)/amlws-assets/endpoints/batch/batch-endpoint.yml
           - template: ../aml-cli-v2-templates/create-deployment.yml
             parameters:
               deployment_name: $(Build.Repository.Name)-batch-dp
-              deployment_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/batch/batch-deployment.yml
+              deployment_file: $(Build.SourcesDirectory)/amlws-assets/endpoints/batch/batch-deployment.yml
           - template: ../aml-cli-v2-templates/test-deployment.yml
             parameters:
               deployment_name: $(Build.Repository.Name)-batch-dp

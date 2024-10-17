@@ -28,11 +28,11 @@ stages:
           - template: ../aml-cli-v2-templates/connect-to-workspace.yml
           - template: ../aml-cli-v2-templates/create-endpoint.yml
             parameters:
-              endpoint_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/online/online-endpoint.yml
+              endpoint_file: $(Build.SourcesDirectory)/amlws-assets/endpoints/online/online-endpoint.yml
           - template: ../aml-cli-v2-templates/create-deployment.yml
             parameters:
               deployment_name: $(Build.Repository.Name)-online-dp
-              deployment_file: $(Build.SourcesDirectory)/mlops-pipelines/deploy/online/online-deployment.yml
+              deployment_file: $(Build.SourcesDirectory)/amlws-assets/endpoints/online/online-deployment.yml
           - template: ../aml-cli-v2-templates/allocate-traffic.yml
             parameters:
               traffic_allocation: $(Build.Repository.Name)-online-dp=100
