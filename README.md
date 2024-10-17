@@ -119,11 +119,21 @@ amlws-assets/
   │   ├── request.json                  # Sample request file for batch scoring.
   │   ├── stage.csv                     # Test Dataset for staging environment.
   │   └── stage.yml                     # YAML file containing metadata for the staging dataset.
+  ├── endpoints/                         # Directory for deployment pipelines.
+  │   ├── batch/                          # Subdirectory for batch deployment pipelines.
+  │   │   ├── batch-deployment.yml      # Pipeline for deploying batch models.
+  │   │   └── batch-endpoint.yml        # Pipeline for setting up batch endpoints.
+  │   └── online/                         # Subdirectory for online deployment pipelines.
+  │       ├── online-deployment.yml     # Pipeline for deploying online models.
+  │       └── online-endpoint.yml       # Pipeline for setting up online endpoints.
   ├── environment/                       # Directory for environment configurations.
   │   ├── automl-conda.yml              # Conda environment configuration for AutoML.
   │   ├── automl-env.yml                # YAML file for the AutoML environment.
   │   ├── train-conda.yml               # Conda environment configuration for training.
   │   └── train-env.yml                 # YAML file for the training environment.
+  ├── pipelinejobs/                       # Directory for evaluation pipelines.
+  │   ├── stage-test.yml                # Pipeline for testing models in the staging environment.
+  │   └── dev-train.yml                 # Pipeline for training models in the development environment.
   ├── src/                               # Source code for the project.
   │   ├── evaluate.py                   # Script to evaluate the performance of models.
   │   ├── prep.py                       # Script for data preparation and preprocessing.
@@ -148,18 +158,6 @@ infrastructure/
   │   └── bicep-ado-deploy-infra.yml    # YAML template for deploying infrastructure using Bicep.
 
 mlops-pipelines/
-  ├── deploy/                             # Directory for deployment pipelines.
-  │   ├── batch/                         # Subdirectory for batch deployment pipelines.
-  │   │   ├── batch-deployment.yml       # Pipeline for deploying batch models.
-  │   │   └── batch-endpoint.yml         # Pipeline for setting up batch endpoints.
-  │   └── online/                        # Subdirectory for online deployment pipelines.
-  │       ├── online-deployment.yml      # Pipeline for deploying online models.
-  │       └── online-endpoint.yml        # Pipeline for setting up online endpoints.
-  ├── evaluate/                           # Directory for evaluation pipelines.
-  │   ├── test/                          # Subdirectory for testing pipelines.
-  │   │   └── stage-test.yml             # Pipeline for testing models in the staging environment.
-  │   └── train/                         # Subdirectory for training pipelines.
-  │       └── dev-train.yml              # Pipeline for training models in the development environment.
   ├── dev-model-training.yml             # Main development model training pipeline.
   ├── prod-batch-endpoint.yml            # Production batch endpoint deployment pipeline.
   ├── prod-online-endpoint.yml           # Production online endpoint deployment pipeline.
