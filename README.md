@@ -15,7 +15,7 @@ This repository is based on the mlopsv2 accelerator repo by the Azure team https
 6. [Directory Structure](#directory-structure)
 7. [Project Structure](#project-structure)
 8. [Python Pipeline Overview](#python-pipeline-overview)
-9. [MLOps Pipelines and CI/CD Architecture](#mlops-pipelines-and-cicd-architecture)
+9. [MLOps Pipelines and CI/CD Architecture](#mlops-ado-pipelines-and-cicd-architecture)
 10. [Deploy and Execute Azure Machine Learning Pipelines](#deploy-and-execute-azure-machine-learning-pipelines)
 11. [Usage](#usage)
 12. [Contributing](#contributing)
@@ -159,7 +159,7 @@ infrastructure/
   ├── pipelines/                         # Directory for infrastructure deployment pipelines.
   │   └── bicep-ado-deploy-infra.yml    # YAML template for deploying infrastructure using Bicep.
 
-mlops-pipelines/
+mlops-ado-pipelines/
   ├── dev-model-training.yml             # Main development model training pipeline.
   ├── prod-batch-endpoint.yml            # Production batch endpoint deployment pipeline.
   ├── prod-online-endpoint.yml           # Production online endpoint deployment pipeline.
@@ -194,7 +194,7 @@ This folder is dedicated to the infrastructure setup for the Azure resources:
 - **modules/**: Houses Bicep modules for resource creation, such as Azure ML workspaces and compute clusters.
 - **pipelines/**: Includes YAML files for deploying infrastructure using Bicep.
 
-### mlops-pipelines/
+### mlops-ado-pipelines/
 
 This directory contains the main Azure DevOps pipelines for MLOps processes:
 
